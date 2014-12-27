@@ -68,7 +68,7 @@ def generate_color_table():
     for r in range(MAX):
         for g in range(MAX):
             for b in range(MAX):
-                colors[i, :] = lab_from_rgb(r, g, b).get_value_tuple()
+                colors[i, :] = lab_from_rgb(r, g, b)
                 pbar.update(i)
                 i += 1
     pbar.finish()
