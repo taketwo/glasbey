@@ -8,6 +8,18 @@ al. [1] that is capable of identifying such a set. Dissimilarity between colors
 is computed in the state-of-the-art perceptually uniform color space CAM02-UCS
 [2].
 
+Examples
+--------
+
+A palette with 30 colors, based on the "Set1" palette from [ColorBrewer2](http://bl.ocks.org/mbostock/5577023), with colors similar to black excluded.
+
+![30 colors, based on "Set1"](https://raw.github.com/taketwo/glasbey/master/images/palette-set1-30.png)
+
+A palette with 30 colors. First one was fixed to be white; no restrictions
+regarding similarity to black.
+
+![30 colors, starting with white](https://raw.github.com/taketwo/glasbey/master/images/palette-white-30.png)
+
 Requirements
 ------------
 
@@ -82,5 +94,5 @@ References
    Color Research and Application, 32: 304-309
 
 2) Luo, M. R., Cui, G. and Li, C. (2006),
-   [Uniform Colour Spaces Based on CIECAM02 Colour Appearance Model](http://onlinelibrary.wiley.com/doi/10.1002/col.20227/abstract)
+   [Uniform Colour Spaces Based on CIECAM02 Colour Appearance Model](http://onlinelibrary.wiley.com/doi/10.1002/col.20227/abstract).
    Color Research and Application, 31: 320–330
