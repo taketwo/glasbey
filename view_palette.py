@@ -4,6 +4,7 @@
 import sys
 import ctypes
 import argparse
+import numpy as np
 
 
 def palette_to_image(palette):
@@ -18,6 +19,8 @@ def palette_to_image(palette):
             g = (color >>  8) % 256
             r = (color >> 16) % 256
             color = (r, g, b)
+        elif isinstance(color, np.ndarray):
+            color = tuple(int(round(k * 255)) for k in color)
         for x in range(WIDTH):
             for y in range(HEIGHT_SEGMENT):
                 pixels[x, y + i * HEIGHT_SEGMENT] = color
