@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import sys
+import ast
 import argparse
 import numpy as np
 from colorspacious import cspace_convert
@@ -56,12 +57,26 @@ def generate_color_table():
     return colors
 
 
-def generate_palette(colors, size, base=None, no_black=False):
+def generate_palette(colors, size, base=None, no_black=False,
+                     lightness_range=None, chroma_range=None, hue_range=None):
     # Initialize palette with given base or white color
     if base:
         palette = [colors[i, :] for i in base]
     else:
         palette = [colors[-1, :]]  # white
+    # Exclude greys (values with low Chroma in JCh) and set lightness range,
+    if lightness_range is not None:
+        jch = cspace_convert(colors, 'CAM02-UCS', 'JCh')
+        colors = colors[(jch[:, 0] >= lightness_range[0]) & (jch[:, 0] <= lightness_range[1]), :]
+    if chroma_range is not None:
+        jch = cspace_convert(colors, 'CAM02-UCS', 'JCh')
+        colors = colors[(jch[:, 1] >= chroma_range[0]) & (jch[:, 1] <= chroma_range[1]), :]
+    if hue_range is not None:
+        jch = cspace_convert(colors, 'CAM02-UCS', 'JCh')
+        if hue_range[0] > hue_range[1]:
+            colors = colors[(jch[:, 2] >= hue_range[0]) | (jch[:, 2] <= hue_range[1]), :]
+        else:
+            colors = colors[(jch[:, 2] >= hue_range[0]) & (jch[:, 2] <= hue_range[1]), :]
     # Exclude colors that are close to black
     if no_black:
         MIN_DISTANCE_TO_BLACK = 35
@@ -148,6 +163,12 @@ if __name__ == '__main__':
                         help='file with base palette')
     parser.add_argument('--no-black', action='store_true',
                         help='avoid black and similar colors')
+    parser.add_argument('--lightness-range', type=ast.literal_eval,
+                        help='set min and max for lightness (e.g. 0,90)')
+    parser.add_argument('--chroma-range', type=ast.literal_eval,
+                        help='set min and max for chroma (e.g. 10,100)')
+    parser.add_argument('--hue-range', type=ast.literal_eval,
+                        help='set start and end for hue (e.g. 315,45)')
     parser.add_argument('--view', action='store_true',
                         help='view generated palette')
     parser.add_argument('--format', default='byte',
@@ -174,7 +195,11 @@ if __name__ == '__main__':
         colors = generate_color_table()
         np.savez_compressed(LUT, lut=colors)
 
-    palette = generate_palette(colors, args.size, base, no_black=args.no_black)
+    palette = generate_palette(colors, args.size, base,
+                               no_black=args.no_black,
+                               lightness_range=args.lightness_range,
+                               chroma_range=args.chroma_range,
+                               hue_range=args.hue_range)
     save_palette(palette, args.output, args.format)
 
     if args.view:
