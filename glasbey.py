@@ -149,7 +149,8 @@ if __name__ == '__main__':
 
     If having black (and colors close to black) is undesired, then `--no-black`
     option may be used to prevent the algorithm from inserting such colors into
-    the palette.
+    the palette. In addition to that, the range of colors considered for
+    inclusion in the palette can be limited by lightness, chroma, or hue.
 
     ¹) Glasbey, C., van der Heijden, G., Toh, V. F. K. and Gray, A. (2007),
        Colour Displays for Categorical Images.

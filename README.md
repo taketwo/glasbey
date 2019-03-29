@@ -63,7 +63,8 @@ usage: glasbey.py [-h] [--base-palette BASE_PALETTE] [--no-black] [--view]
 
     If having black (and colors close to black) is undesired, then `--no-black`
     option may be used to prevent the algorithm from inserting such colors into
-    the palette.
+    the palette. In addition to that, the range of colors considered for
+    inclusion in the palette can be limited by lightness, chroma, or hue.
 
     ¹) Glasbey, C., van der Heijden, G., Toh, V. F. K. and Gray, A. (2007),
        Colour Displays for Categorical Images.
@@ -72,6 +73,7 @@ usage: glasbey.py [-h] [--base-palette BASE_PALETTE] [--no-black] [--view]
     ²) Luo, M. R., Cui, G. and Li, C. (2006),
        Uniform Colour Spaces Based on CIECAM02 Colour Appearance Model.
        Color Research and Application, 31: 320–330
+
 
 positional arguments:
   size                  number of colors in the palette
@@ -82,8 +84,15 @@ optional arguments:
   --base-palette BASE_PALETTE
                         file with base palette
   --no-black            avoid black and similar colors
+  --lightness-range LIGHTNESS_RANGE
+                        set min and max for lightness (e.g. 0,90)
+  --chroma-range CHROMA_RANGE
+                        set min and max for chroma (e.g. 10,100)
+  --hue-range HUE_RANGE
+                        set start and end for hue (e.g. 315,45)
   --view                view generated palette
-  --format FORMAT       output format (byte or float)
+  --format {byte,float}
+                        output format
 ```
 
 References
