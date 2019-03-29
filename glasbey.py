@@ -4,22 +4,38 @@
 import sys
 import ast
 import argparse
+
 import numpy as np
 from colorspacious import cspace_convert
+
 from view_palette import palette_to_image
 
 
 try:
     from progressbar import Bar, ETA, Percentage, ProgressBar
 except ImportError:
-    class Bar: pass
-    class ETA: pass
-    class Percentage: pass
+
+    class Bar:
+        pass
+
+    class ETA:
+        pass
+
+    class Percentage:
+        pass
+
     class ProgressBar:
-        def __init__(self, **kwargs): pass
-        def start(self): return self
-        def update(self, i): pass
-        def finish(self): pass
+        def __init__(self, **kwargs):
+            pass
+
+        def start(self):
+            return self
+
+        def update(self, i):
+            pass
+
+        def finish(self):
+            pass
 
 
 MAX = 256
@@ -35,10 +51,7 @@ def generate_color_table():
     a', and b' components. The table is stored as a NumPy array.
     """
 
-    widgets = ['Generating color table: ',
-               Percentage(), ' ',
-               Bar(), ' ',
-               ETA()]
+    widgets = ["Generating color table: ", Percentage(), " ", Bar(), " ", ETA()]
     pbar = ProgressBar(widgets=widgets, maxval=(MAX * MAX)).start()
 
     i = 0
@@ -48,17 +61,24 @@ def generate_color_table():
             d = i * MAX
             for b in range(MAX):
                 colors[d + b, :] = (r, g, b)
-            colors[d:d + MAX] = cspace_convert(colors[d:d + MAX],
-                                               'sRGB255',
-                                               'CAM02-UCS')
+            colors[d:d + MAX] = cspace_convert(
+                colors[d:d + MAX], "sRGB255", "CAM02-UCS"
+            )
             pbar.update(i)
             i += 1
     pbar.finish()
     return colors
 
 
-def generate_palette(colors, size, base=None, no_black=False,
-                     lightness_range=None, chroma_range=None, hue_range=None):
+def generate_palette(
+    colors,
+    size,
+    base=None,
+    no_black=False,
+    lightness_range=None,
+    chroma_range=None,
+    hue_range=None,
+):
     # Initialize palette with given base or white color
     if base:
         palette = [colors[i, :] for i in base]
@@ -66,17 +86,25 @@ def generate_palette(colors, size, base=None, no_black=False,
         palette = [colors[-1, :]]  # white
     # Exclude greys (values with low Chroma in JCh) and set lightness range,
     if lightness_range is not None:
-        jch = cspace_convert(colors, 'CAM02-UCS', 'JCh')
-        colors = colors[(jch[:, 0] >= lightness_range[0]) & (jch[:, 0] <= lightness_range[1]), :]
+        jch = cspace_convert(colors, "CAM02-UCS", "JCh")
+        colors = colors[
+            (jch[:, 0] >= lightness_range[0]) & (jch[:, 0] <= lightness_range[1]), :
+        ]
     if chroma_range is not None:
-        jch = cspace_convert(colors, 'CAM02-UCS', 'JCh')
-        colors = colors[(jch[:, 1] >= chroma_range[0]) & (jch[:, 1] <= chroma_range[1]), :]
+        jch = cspace_convert(colors, "CAM02-UCS", "JCh")
+        colors = colors[
+            (jch[:, 1] >= chroma_range[0]) & (jch[:, 1] <= chroma_range[1]), :
+        ]
     if hue_range is not None:
-        jch = cspace_convert(colors, 'CAM02-UCS', 'JCh')
+        jch = cspace_convert(colors, "CAM02-UCS", "JCh")
         if hue_range[0] > hue_range[1]:
-            colors = colors[(jch[:, 2] >= hue_range[0]) | (jch[:, 2] <= hue_range[1]), :]
+            colors = colors[
+                (jch[:, 2] >= hue_range[0]) | (jch[:, 2] <= hue_range[1]), :
+            ]
         else:
-            colors = colors[(jch[:, 2] >= hue_range[0]) & (jch[:, 2] <= hue_range[1]), :]
+            colors = colors[
+                (jch[:, 2] >= hue_range[0]) & (jch[:, 2] <= hue_range[1]), :
+            ]
     # Exclude colors that are close to black
     if no_black:
         MIN_DISTANCE_TO_BLACK = 35
@@ -89,11 +117,9 @@ def generate_palette(colors, size, base=None, no_black=False,
     def update_distances(colors, color):
         d = np.linalg.norm((colors - color), axis=1)
         np.minimum(distances, d.reshape(distances.shape), distances)
+
     # Build progress bar
-    widgets = ['Generating palette: ',
-               Percentage(), ' ',
-               Bar(), ' ',
-               ETA()]
+    widgets = ["Generating palette: ", Percentage(), " ", Bar(), " ", ETA()]
     pbar = ProgressBar(widgets=widgets, maxval=size).start()
     # Update distances for the colors that are already in the palette
     for i in range(len(palette) - 1):
@@ -105,29 +131,30 @@ def generate_palette(colors, size, base=None, no_black=False,
         palette.append(colors[np.argmax(distances), :])
         pbar.update(len(palette))
     pbar.finish()
-    return cspace_convert(palette, 'CAM02-UCS', 'sRGB1')
+    return cspace_convert(palette, "CAM02-UCS", "sRGB1")
 
 
 def load_palette(f):
     palette = list()
     for line in f.readlines():
-        rgb = [int(c) for c in line.strip().split(',')]
+        rgb = [int(c) for c in line.strip().split(",")]
         palette.append((rgb[0] * 256 + rgb[1]) * 256 + rgb[2])
     return palette
 
 
 def save_palette(palette, f, fmt):
-    if fmt == 'byte':
+    if fmt == "byte":
         for color in palette:
             rgb255 = tuple(int(round(k * 255)) for k in color)
-            f.write('{},{},{}\n'.format(*rgb255))
+            f.write("{},{},{}\n".format(*rgb255))
     else:
         for color in palette:
-            f.write('{:.6f},{:.6f},{:.6f}\n'.format(*(abs(k) for k in color)))
+            f.write("{:.6f},{:.6f},{:.6f}\n".format(*(abs(k) for k in color)))
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='''
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="""
     Generate a palette with maximally disticts colors using the sequential
     method of Glasbey et al.¹
 
@@ -159,48 +186,65 @@ if __name__ == '__main__':
     ²) Luo, M. R., Cui, G. and Li, C. (2006),
        Uniform Colour Spaces Based on CIECAM02 Colour Appearance Model.
        Color Research and Application, 320–330
-    ''', formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--base-palette', type=argparse.FileType('r'),
-                        help='file with base palette')
-    parser.add_argument('--no-black', action='store_true',
-                        help='avoid black and similar colors')
-    parser.add_argument('--lightness-range', type=ast.literal_eval,
-                        help='set min and max for lightness (e.g. 0,90)')
-    parser.add_argument('--chroma-range', type=ast.literal_eval,
-                        help='set min and max for chroma (e.g. 10,100)')
-    parser.add_argument('--hue-range', type=ast.literal_eval,
-                        help='set start and end for hue (e.g. 315,45)')
-    parser.add_argument('--view', action='store_true',
-                        help='view generated palette')
-    parser.add_argument('--format', default='byte', choices=["byte", "float"],
-                        help='output format')
-    parser.add_argument('size', type=int,
-                        help='number of colors in the palette')
-    parser.add_argument('output', type=argparse.FileType('w'),
-                        help='output palette filename')
+    """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--base-palette", type=argparse.FileType("r"), help="file with base palette"
+    )
+    parser.add_argument(
+        "--no-black", action="store_true", help="avoid black and similar colors"
+    )
+    parser.add_argument(
+        "--lightness-range",
+        type=ast.literal_eval,
+        help="set min and max for lightness (e.g. 0,90)",
+    )
+    parser.add_argument(
+        "--chroma-range",
+        type=ast.literal_eval,
+        help="set min and max for chroma (e.g. 10,100)",
+    )
+    parser.add_argument(
+        "--hue-range",
+        type=ast.literal_eval,
+        help="set start and end for hue (e.g. 315,45)",
+    )
+    parser.add_argument("--view", action="store_true", help="view generated palette")
+    parser.add_argument(
+        "--format", default="byte", choices=["byte", "float"], help="output format"
+    )
+    parser.add_argument("size", type=int, help="number of colors in the palette")
+    parser.add_argument(
+        "output", type=argparse.FileType("w"), help="output palette filename"
+    )
     args = parser.parse_args()
 
-    if not args.format in ['byte', 'float']:
+    if args.format not in ["byte", "float"]:
         sys.exit('Invalid output format "{}"'.format(args.format))
 
     # Load base palette
     base = load_palette(args.base_palette) if args.base_palette else None
 
     # Load or generate RGB to CAM02-UCS color lookup table
-    LUT = 'rgb_cam02ucs_lut.npz'
+    LUT = "rgb_cam02ucs_lut.npz"
     try:
-        colors = np.load(LUT)['lut']
+        colors = np.load(LUT)["lut"]
         # Sanity check
         assert colors.shape == (NUM_COLORS, 3)
     except:
         colors = generate_color_table()
         np.savez_compressed(LUT, lut=colors)
 
-    palette = generate_palette(colors, args.size, base,
-                               no_black=args.no_black,
-                               lightness_range=args.lightness_range,
-                               chroma_range=args.chroma_range,
-                               hue_range=args.hue_range)
+    palette = generate_palette(
+        colors,
+        args.size,
+        base,
+        no_black=args.no_black,
+        lightness_range=args.lightness_range,
+        chroma_range=args.chroma_range,
+        hue_range=args.hue_range,
+    )
     save_palette(palette, args.output, args.format)
 
     if args.view:
