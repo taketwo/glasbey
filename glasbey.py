@@ -171,8 +171,8 @@ if __name__ == '__main__':
                         help='set start and end for hue (e.g. 315,45)')
     parser.add_argument('--view', action='store_true',
                         help='view generated palette')
-    parser.add_argument('--format', default='byte',
-                        help='output format (byte or float)')
+    parser.add_argument('--format', default='byte', choices=["byte", "float"],
+                        help='output format')
     parser.add_argument('size', type=int,
                         help='number of colors in the palette')
     parser.add_argument('output', type=argparse.FileType('w'),
