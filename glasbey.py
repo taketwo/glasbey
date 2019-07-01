@@ -77,7 +77,7 @@ class Glasbey:
             self.base_palette = base_palette
             self.palette = self.load_palette(base_palette)
             self.palette = [self.colors[i, :] for i in self.palette]
-        elif type(base_palette) == list:
+        elif type(base_palette) == list and len(base_palette) > 0:
             self.palette = [(rgb[0] * 256 + rgb[1]) * 256 + rgb[2] for rgb in base_palette]
             self.palette = [self.colors[i, :] for i in self.palette]
         else:

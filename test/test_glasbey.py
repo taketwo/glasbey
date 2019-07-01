@@ -82,6 +82,12 @@ class TestGlasbey(TestCase):
         palette = gb.get_palette(10)
         self.assertEqual(10, len(palette))
 
+    def test_empty_rgb_list_as_base_palette(self):
+        base_palette = []
+        gb = Glasbey(base_palette=base_palette)
+        palette = gb.get_palette(size=3)
+        self.assertEqual(3, len(palette))
+
     def test_bad_rgb_list(self):
         with self.assertRaises(AssertionError):
             base_palette = [(256, 0, 0), (0, 0, 0), (0, 0, 0)]
