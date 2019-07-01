@@ -90,8 +90,9 @@ Usage as class
 --------------
 
 ```
->>> from Glasbey import Glasbey
+>>> from glasbey import Glasbey
 >>> gb = Glasbey(base_palette="palettes/set1.txt", overwrite_base_palette=True, lightness_range=(10,100), hue_range=(10,100), chroma_range=(10,100), no_black=True)  # complicated example (demonstrate syntax)
+>>> gb = Glasbey(base_palette=[(255, 0, 0), (0, 255, 0), (0, 0, 255)])  # base_palette can also be rbg-list
 >>> gb = Glasbey()  # simplest example, as all init parameters are optional
 Generating color table: 100% |################################| Time:  0:00:34
 >>> gb.get_palette(size=3)

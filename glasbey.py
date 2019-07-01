@@ -251,7 +251,7 @@ class Glasbey:
         return True
 
     @staticmethod
-    def convert_palette_to_rbg(palette):
+    def convert_palette_to_rgb(palette):
         """
         Convert palette from sRGB1 to sRGB255.
         """
