@@ -47,34 +47,45 @@ except ImportError:
 
 class Glasbey:
     def __init__(self,
-                 base_palette: str = None,
+                 base_palette=None,
                  overwrite_base_palette: bool = False,
                  no_black: bool = False,
                  lightness_range=None,
                  chroma_range=None,
                  hue_range=None):
-        # constants
+        # Constants
         self.MAX = 256
         self.NUM_COLORS = self.MAX * self.MAX * self.MAX
         self.LUT = os.path.dirname(os.path.realpath(__file__)) + "/rgb_cam02ucs_lut.npz"
 
         self.overwrite_base_palette = overwrite_base_palette
-        self.base_palette = base_palette
-        if self.base_palette:
-            assert os.path.isfile(self.base_palette), "file does not exist: {}".format(self.base_palette)
+
+        # Check input
+        if type(base_palette) == str:
+            assert os.path.isfile(base_palette), "file does not exist: {}".format(base_palette)
+        elif type(base_palette) == list:
+            assert self.rgb_palette_invariant(base_palette), "Base palette must be in this format: [(255,255,255), ...]"
+            assert not self.overwrite_base_palette, "base_palette is no file, cannot overwrite it!"
         else:
             assert not self.overwrite_base_palette, "no base_palette specified, cannot overwrite it!"
 
         # Load colors
         self.colors = self.load_colors()
-        # Initialize palette with given base or white color
-        if self.base_palette:
+
+        # Initialize base palette
+        if type(base_palette) == str:
+            self.base_palette = base_palette
             self.palette = self.load_palette(base_palette)
+            self.palette = [self.colors[i, :] for i in self.palette]
+        elif type(base_palette) == list:
+            self.palette = [(rgb[0] * 256 + rgb[1]) * 256 + rgb[2] for rgb in base_palette]
             self.palette = [self.colors[i, :] for i in self.palette]
         else:
             self.palette = [self.colors[-1, :]]  # white
 
-        # update colors
+        assert self.palette_invariant(), "Internal error during __init__: self.palette is poorly formatted."
+
+        # Update self.colors
         # Exclude greys (values with low Chroma in JCh) and set lightness range,
         if lightness_range is not None:
             jch = cspace_convert(self.colors, "CAM02-UCS", "JCh")
@@ -181,6 +192,8 @@ class Glasbey:
             pbar.update(len(self.palette))
         pbar.finish()
 
+        assert self.palette_invariant(), "Internal error during extend_palette: self.palette is poorly formatted."
+
         if self.overwrite_base_palette:
             self.save_palette(palette=self.palette, path=self.base_palette, format="byte", overwrite=True)
 
@@ -217,6 +230,26 @@ class Glasbey:
             else:
                 raise ValueError("Format doesn't match. Choose between 'byte' and 'float'")
 
+    def palette_invariant(self):
+        if type(self.palette) != list:
+            return False
+        for color in self.palette:
+            if len(color) != 3 or type(color) != np.ndarray:
+                return False
+        return True
+
+    @staticmethod
+    def rgb_palette_invariant(palette):
+        if type(palette) != list:
+            return False
+        for color in palette:
+            if len(color) != 3 or type(color) != tuple:
+                return False
+            if not 0 <= color[0] <= 255 and 0 <= color[1] <= 255 and 0 <= color[2] <= 255:
+                return False
+
+        return True
+
     @staticmethod
     def convert_palette_to_rbg(palette):
         """
@@ -231,7 +264,7 @@ class Glasbey:
 
         Expected format: sRGB1 or sRGB255
         """
-        img = PaletteViewer.palette_to_image(palette)
+        img = palette_to_image(palette)
         img.show()
 
 

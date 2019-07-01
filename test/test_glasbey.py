@@ -11,6 +11,8 @@ class TestGlasbey(TestCase):
         self.test_palette = file_path + "/../palettes/set1.txt"
         self.test_palette_bkp = file_path + "/../palettes/set1.txt.bkp"
 
+        self.tearDown()
+
         assert os.path.isfile(self.test_palette)
         assert not os.path.isfile(self.test_palette_bkp)
 
@@ -19,9 +21,11 @@ class TestGlasbey(TestCase):
             # do this in case a test failed
             move(self.test_palette_bkp, self.test_palette)
 
-    def test_bad_path(self):
+    def test_bad_input(self):
         with self.assertRaises(AssertionError):
             gb = Glasbey(base_palette="!!bad_path!!")
+        with self.assertRaises(AssertionError):
+            gb = Glasbey(overwrite_base_palette=True)
 
     def test_simple(self):
         gb = Glasbey(base_palette=self.test_palette)
@@ -69,3 +73,22 @@ class TestGlasbey(TestCase):
         self.assertEqual(10, len(open(self.test_palette, 'r').readlines()))
 
         move(self.test_palette_bkp, self.test_palette)
+
+    def test_rbg_list_as_base_palette(self):
+        base_palette = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        gb = Glasbey(base_palette=base_palette)
+        palette = gb.get_palette(size=3)
+        self.assertEqual(3, len(palette))
+        palette = gb.get_palette(10)
+        self.assertEqual(10, len(palette))
+
+    def test_bad_rbg_list(self):
+        with self.assertRaises(AssertionError):
+            base_palette = [(256, 0, 0), (0, 0, 0), (0, 0, 0)]
+            gb = Glasbey(base_palette=base_palette)
+        with self.assertRaises(AssertionError):
+            base_palette = [(-1, 0, 0), (0, 0, 0), (0, 0, 0)]
+            gb = Glasbey(base_palette=base_palette)
+        with self.assertRaises(AssertionError):
+            base_palette = [(0, 0, 0), (0, 0, 0), (0, 0, 0)]
+            gb = Glasbey(base_palette=base_palette, overwrite_base_palette=True)
