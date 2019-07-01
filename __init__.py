@@ -1,2 +1,1 @@
-from .Glasbey import Glasbey
-from .PaletteViewer import PaletteViewer
+from .glasbey import Glasbey
