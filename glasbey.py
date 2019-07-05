@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import os, sys
+
+import os
+import sys
 import ast
 import argparse
 
@@ -64,13 +66,13 @@ class Glasbey:
         if type(base_palette) == str:
             assert os.path.isfile(base_palette), "file does not exist: {}".format(base_palette)
         elif type(base_palette) == list:
-            assert self.rgb_palette_invariant(base_palette), "Base palette must be in this format: [(255,255,255), ...]"
+            assert self.check_validity_rbg_palette(base_palette), "Base palette must be in this format: [(255,255,255), ...]"
             assert not self.overwrite_base_palette, "base_palette is no file, cannot overwrite it!"
         else:
             assert not self.overwrite_base_palette, "no base_palette specified, cannot overwrite it!"
 
         # Load colors
-        self.colors = self.load_colors()
+        self.colors = self.load_or_generate_color_table()
 
         # Initialize base palette
         if type(base_palette) == str:
@@ -83,7 +85,7 @@ class Glasbey:
         else:
             self.palette = [self.colors[-1, :]]  # white
 
-        assert self.palette_invariant(), "Internal error during __init__: self.palette is poorly formatted."
+        assert self.check_validity_internal_palette(), "Internal error during __init__: self.palette is poorly formatted."
 
         # Update self.colors
         # Exclude greys (values with low Chroma in JCh) and set lightness range,
@@ -113,19 +115,46 @@ class Glasbey:
             d = np.linalg.norm((self.colors - self.colors[0, :]), axis=1)
             self.colors = self.colors[d > MIN_DISTANCE_TO_BLACK, :]
 
-    def get_palette(self, size):
+    def generate_palette(self, size):
         """
         Return palette in sRGB1 format.
 
         If the palette isn't long enough, new entries are generated.
         """
+        if size <= len(self.palette):
+            return cspace_convert(self.palette[0:size], "CAM02-UCS", "sRGB1")
 
-        if size > len(self.palette):
-            # need to extend palette
-            self.extend_palette(size=size)
+        # Initialize distances array
+        num_colors = self.colors.shape[0]
+        distances = np.ones(shape=(num_colors, 1)) * 1000
+
+        # A function to recompute minimum distances from palette to all colors
+        def update_distances(colors, color):
+            d = np.linalg.norm((colors - color), axis=1)
+            np.minimum(distances, d.reshape(distances.shape), distances)
+
+        # Build progress bar
+        widgets = ["Generating palette: ", Percentage(), " ", Bar(), " ", ETA()]
+        pbar = ProgressBar(widgets=widgets, maxval=size).start()
+        # Update distances for the colors that are already in the palette
+        for i in range(len(self.palette) - 1):
+            update_distances(self.colors, self.palette[i])
+            pbar.update(i)
+        # Iteratively build palette
+        while len(self.palette) < size:
+            update_distances(self.colors, self.palette[-1])
+            self.palette.append(self.colors[np.argmax(distances), :])
+            pbar.update(len(self.palette))
+        pbar.finish()
+
+        assert self.check_validity_internal_palette(), "Internal error during extend_palette: self.palette is poorly formatted."
+
+        if self.overwrite_base_palette:
+            self.save_palette(palette=self.palette, path=self.base_palette, format="byte", overwrite=True)
+
         return cspace_convert(self.palette[0:size], "CAM02-UCS", "sRGB1")
 
-    def load_colors(self):
+    def load_or_generate_color_table(self):
         # Load or generate RGB to CAM02-UCS color lookup table
         try:
             colors = np.load(self.LUT)["lut"]
@@ -163,41 +192,8 @@ class Glasbey:
         pbar.finish()
         return colors
 
-    def extend_palette(self, size):
-        """
-        Add new, distinct colors to self.palette.
-        """
-        assert size > len(self.palette)  # sanity check
-
-        # Initialize distances array
-        num_colors = self.colors.shape[0]
-        distances = np.ones(shape=(num_colors, 1)) * 1000
-
-        # A function to recompute minimum distances from palette to all colors
-        def update_distances(colors, color):
-            d = np.linalg.norm((colors - color), axis=1)
-            np.minimum(distances, d.reshape(distances.shape), distances)
-
-        # Build progress bar
-        widgets = ["Generating palette: ", Percentage(), " ", Bar(), " ", ETA()]
-        pbar = ProgressBar(widgets=widgets, maxval=size).start()
-        # Update distances for the colors that are already in the palette
-        for i in range(len(self.palette) - 1):
-            update_distances(self.colors, self.palette[i])
-            pbar.update(i)
-        # Iteratively build palette
-        while len(self.palette) < size:
-            update_distances(self.colors, self.palette[-1])
-            self.palette.append(self.colors[np.argmax(distances), :])
-            pbar.update(len(self.palette))
-        pbar.finish()
-
-        assert self.palette_invariant(), "Internal error during extend_palette: self.palette is poorly formatted."
-
-        if self.overwrite_base_palette:
-            self.save_palette(palette=self.palette, path=self.base_palette, format="byte", overwrite=True)
-
-    def load_palette(self, path):
+    @staticmethod
+    def load_palette(path):
         """
         Expected format: sRGB255
         """
@@ -230,7 +226,7 @@ class Glasbey:
             else:
                 raise ValueError("Format doesn't match. Choose between 'byte' and 'float'")
 
-    def palette_invariant(self):
+    def check_validity_internal_palette(self):
         if type(self.palette) != list:
             return False
         for color in self.palette:
@@ -239,7 +235,7 @@ class Glasbey:
         return True
 
     @staticmethod
-    def rgb_palette_invariant(palette):
+    def check_validity_rbg_palette(palette):
         if type(palette) != list:
             return False
         for color in palette:
@@ -343,7 +339,7 @@ if __name__ == "__main__":
                  chroma_range=args.chroma_range,
                  hue_range=args.hue_range)
 
-    new_palette = gb.get_palette(size=args.size)
+    new_palette = gb.generate_palette(size=args.size)
     assert len(new_palette) == args.size
 
     gb.save_palette(new_palette, args.output.name, args.format, overwrite=True)
