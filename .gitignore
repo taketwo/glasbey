@@ -53,4 +53,4 @@ coverage.xml
 docs/_build/
 
 # Generated color lookup table
-rgb_lab_lut.npz
+*_lut.npz

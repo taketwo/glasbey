@@ -34,8 +34,8 @@ Optional:
 * [`python-pillow`](https://github.com/python-pillow/Pillow) to visualize
   generated palettes
 
-Usage
------
+Usage as command-line-tool
+--------------------------
 
 ```
 usage: glasbey.py [-h] [--base-palette BASE_PALETTE] [--no-black] [--view]
@@ -74,7 +74,6 @@ usage: glasbey.py [-h] [--base-palette BASE_PALETTE] [--no-black] [--view]
        Uniform Colour Spaces Based on CIECAM02 Colour Appearance Model.
        Color Research and Application, 31: 320–330
 
-
 positional arguments:
   size                  number of colors in the palette
   output                output palette filename
@@ -93,6 +92,34 @@ optional arguments:
   --view                view generated palette
   --format {byte,float}
                         output format
+```
+
+Usage as class
+--------------
+
+```
+>>> from glasbey import Glasbey
+>>> gb = Glasbey(base_palette="palettes/set1.txt", overwrite_base_palette=True, lightness_range=(10,100), hue_range=(10,100), chroma_range=(10,100), no_black=True)  # complicated example (demonstrate syntax)
+>>> gb = Glasbey(base_palette=[(255, 0, 0), (0, 255, 0), (0, 0, 255)])  # base_palette can also be rbg-list
+>>> gb = Glasbey()  # simplest example, as all init parameters are optional
+Generating color table: 100% |################################| Time:  0:00:34
+>>> gb.get_palette(size=3)
+Generating palette: 100% |####################################| Time:  0:00:01
+array([[ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
+       [ 5.88229881e-42,  5.64082875e-42,  5.59612427e-42],
+       [ 8.43137255e-01,  1.43440815e-15, -6.27553565e-16]])
+>>> gb.get_palette(size=5)  # calculates colors 4-5
+Generating palette: 100% |####################################| Time:  0:00:02
+array([[ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
+       [ 5.88229881e-42,  5.64082875e-42,  5.59612427e-42],
+       [ 8.43137255e-01,  1.43440815e-15, -6.27553565e-16],
+       [ 5.49019608e-01,  2.35294118e-01,  1.00000000e+00],
+       [ 7.84313725e-03,  5.33333333e-01, -6.05140937e-16]])
+>>> p = gb.get_palette(size=5)  # instantaneous because these colors were already calculated before
+>>> gb.convert_palette_to_rbg(p)
+[(255, 255, 255), (0, 0, 0), (215, 0, 0), (140, 60, 255), (2, 136, 0)]
+>>> gb.save_palette(p, "out.txt")  # save palette to file
+>>> gb.view_palette(p)  # opens imagemagick window
 ```
 
 References
