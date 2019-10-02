@@ -115,7 +115,7 @@ array([[ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
        [ 8.43137255e-01,  1.43440815e-15, -6.27553565e-16],
        [ 5.49019608e-01,  2.35294118e-01,  1.00000000e+00],
        [ 7.84313725e-03,  5.33333333e-01, -6.05140937e-16]])
->>> p = gb.get_palette(size=5)  # instantaneous because these colors were already calculated before
+>>> p = gb.generate_palette(size=5)  # instantaneous because these colors were already calculated before
 >>> gb.convert_palette_to_rbg(p)
 [(255, 255, 255), (0, 0, 0), (215, 0, 0), (140, 60, 255), (2, 136, 0)]
 >>> gb.save_palette(p, "out.txt")  # save palette to file
