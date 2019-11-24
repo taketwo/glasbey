@@ -103,12 +103,12 @@ Usage as class
 >>> gb = Glasbey(base_palette=[(255, 0, 0), (0, 255, 0), (0, 0, 255)])  # base_palette can also be rbg-list
 >>> gb = Glasbey()  # simplest example, as all init parameters are optional
 Generating color table: 100% |################################| Time:  0:00:34
->>> gb.get_palette(size=3)
+>>> gb.generate_palette(size=3)
 Generating palette: 100% |####################################| Time:  0:00:01
 array([[ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
        [ 5.88229881e-42,  5.64082875e-42,  5.59612427e-42],
        [ 8.43137255e-01,  1.43440815e-15, -6.27553565e-16]])
->>> gb.get_palette(size=5)  # calculates colors 4-5
+>>> gb.generate_palette(size=5)  # calculates colors 4-5
 Generating palette: 100% |####################################| Time:  0:00:02
 array([[ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
        [ 5.88229881e-42,  5.64082875e-42,  5.59612427e-42],
