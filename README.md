@@ -100,7 +100,7 @@ Usage as class
 ```
 >>> from glasbey import Glasbey
 >>> gb = Glasbey(base_palette="palettes/set1.txt", overwrite_base_palette=True, lightness_range=(10,100), hue_range=(10,100), chroma_range=(10,100), no_black=True)  # complicated example (demonstrate syntax)
->>> gb = Glasbey(base_palette=[(255, 0, 0), (0, 255, 0), (0, 0, 255)])  # base_palette can also be rbg-list
+>>> gb = Glasbey(base_palette=[(255, 0, 0), (0, 255, 0), (0, 0, 255)])  # base_palette can also be rgb-list
 >>> gb = Glasbey()  # simplest example, as all init parameters are optional
 Generating color table: 100% |################################| Time:  0:00:34
 >>> gb.generate_palette(size=3)
@@ -116,7 +116,7 @@ array([[ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
        [ 5.49019608e-01,  2.35294118e-01,  1.00000000e+00],
        [ 7.84313725e-03,  5.33333333e-01, -6.05140937e-16]])
 >>> p = gb.generate_palette(size=5)  # instantaneous because these colors were already calculated before
->>> gb.convert_palette_to_rbg(p)
+>>> gb.convert_palette_to_rgb(p)
 [(255, 255, 255), (0, 0, 0), (215, 0, 0), (140, 60, 255), (2, 136, 0)]
 >>> gb.save_palette(p, "out.txt")  # save palette to file
 >>> gb.view_palette(p)  # opens imagemagick window
