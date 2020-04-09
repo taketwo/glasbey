@@ -223,8 +223,12 @@ class Glasbey:
             elif format.lower() == "float":
                 for color in palette:
                     file.write("{:.6f},{:.6f},{:.6f}\n".format(*(abs(k) for k in color)))
+            if format.lower() == "hex":
+                for color in palette:
+                    rgb255 = tuple(int(round(k * 255)) for k in color)
+                    file.write("#{:02x}{:02x}{:02x}\n".format(*rgb255))
             else:
-                raise ValueError("Format doesn't match. Choose between 'byte' and 'float'")
+                raise ValueError("Format doesn't match. Choose between 'byte', 'hex', and 'float'")
 
     def check_validity_internal_palette(self):
         if type(self.palette) != list:
@@ -321,7 +325,7 @@ if __name__ == "__main__":
                         help="set start and end for hue (e.g. 315,45)")
     parser.add_argument("--view", action="store_true",
                         help="view generated palette")
-    parser.add_argument("--format", default="byte", choices=["byte", "float"],
+    parser.add_argument("--format", default="byte", choices=["byte", "hex", "float"],
                         help="output format")
     parser.add_argument("size", type=int,
                         help="number of colors in the palette")
@@ -329,7 +333,7 @@ if __name__ == "__main__":
                         help="output palette filename")
     args = parser.parse_args()
 
-    if args.format not in ["byte", "float"]:
+    if args.format not in ["byte", "hex", "float"]:
         sys.exit('Invalid output format "{}"'.format(args.format))
 
     gb = Glasbey(base_palette=getattr(args.base_palette, "name", None),
