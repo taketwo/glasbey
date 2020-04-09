@@ -332,7 +332,7 @@ if __name__ == "__main__":
     if args.format not in ["byte", "float"]:
         sys.exit('Invalid output format "{}"'.format(args.format))
 
-    gb = Glasbey(base_palette=args.base_palette.name,
+    gb = Glasbey(base_palette=getattr(args.base_palette, "name", None),
                  overwrite_base_palette=False,
                  no_black=args.no_black,
                  lightness_range=args.lightness_range,
