@@ -223,7 +223,7 @@ class Glasbey:
             elif format.lower() == "float":
                 for color in palette:
                     file.write("{:.6f},{:.6f},{:.6f}\n".format(*(abs(k) for k in color)))
-            if format.lower() == "hex":
+            elif format.lower() == "hex":
                 for color in palette:
                     rgb255 = tuple(int(round(k * 255)) for k in color)
                     file.write("#{:02x}{:02x}{:02x}\n".format(*rgb255))
