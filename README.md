@@ -20,19 +20,28 @@ regarding similarity to black.
 
 ![30 colors, starting with white](https://raw.github.com/taketwo/glasbey/master/images/palette-white-30.png)
 
-Requirements
+Installation
 ------------
 
-Mandatory:
+To install `glasbey` run
+```shell
+pip install path/to/glasbey
+```
 
-* [`colorspacious`](https://github.com/njsmith/colorspacious)
+To show a progress bar during palette generation run
+```shell
+pip install path/to/glasbey[progressbar]
+```
 
-Optional:
+To be able to visualize generated palettes run
+```shell
+pip install path/to/glasbey[view_palette]
+```
 
-* [`python-progressbar`](https://code.google.com/p/python-progressbar/) to show
-  a progress bar during palette generation
-* [`python-pillow`](https://github.com/python-pillow/Pillow) to visualize
-  generated palettes
+For both run
+```shell
+pip install path/to/glasbey[progressbar,view_palette]
+```
 
 Usage as command-line-tool
 --------------------------
