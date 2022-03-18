@@ -9,12 +9,7 @@ import argparse
 import numpy as np
 from colorspacious import cspace_convert
 
-try:
-    # this works if you import Glasbey
-    from .view_palette import palette_to_image
-except ImportError:
-    # this works if you run __main__() function
-    from view_palette import palette_to_image
+from view_palette import palette_to_image
 
 try:
     from progressbar import Bar, ETA, Percentage, ProgressBar
